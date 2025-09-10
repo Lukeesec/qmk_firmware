@@ -6,6 +6,7 @@ Custom keymap for DZTech Tofu Jr (RP2040) with tap dance, combos, and custom key
 
 If you encounter submodule issues (missing ChibiOS files), run this first:
 ```bash
+# Be in root of repo
 make git-submodule
 ```
 

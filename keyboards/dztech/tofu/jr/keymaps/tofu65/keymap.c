@@ -17,6 +17,7 @@ enum custom_keycodes {
   KC_TEN_DOWN,
   KC_THUMB_MODIFIER_LAYER,
   KC_EMAIL_XR,
+  USB_RESTART
 };
 
 // ********** COMBOS **********
@@ -83,8 +84,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [_FUNCTION_LAYER] = LAYOUT_65_ansi(
         KC_GRV, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  QK_BOOT,
-        _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, RGB_VAI, RGB_VAD, _______, KC_PSCR, KC_SCRL, KC_PAUS, KC_NO, QK_RBT,
-        KC_CAPS, RGB_SPI, RGB_SPD, _______, _______, _______, _______, _______, _______, _______, _______, _______,         EE_CLR,  KC_NO,
+        _______, RM_TOGG, RM_NEXT, RM_HUEU, RM_HUED, RM_SATU, RM_SATD, RM_VALU, RM_VALD, _______, KC_PSCR, KC_SCRL, KC_PAUS, KC_NO, QK_RBT,
+        KC_CAPS, RM_SPDU, RM_SPDD, _______, _______, _______, _______, _______, _______, _______, _______, _______,         EE_CLR,  USB_RESTART,
         KC_LSFT, _______, _______, _______, _______, _______, NK_TOGG, _______, _______, _______, _______, _______,          KC_VOLU, KC_MUTE,
         _______, _______, _______,                            _______,          _______, _______, _______,          KC_MPRV, KC_VOLD, KC_MNXT
     ),
@@ -127,6 +128,52 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
+// ********** TAP DANCE **********
+// Tap-hold helper functions for ACTION_TAP_DANCE_TAP_HOLD
+void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+
+    if (state->pressed) {
+        if (state->count == 1
+#ifndef PERMISSIVE_HOLD
+            && !state->interrupted
+#endif
+        ) {
+            register_code16(tap_hold->hold);
+            tap_hold->held = tap_hold->hold;
+        } else {
+            register_code16(tap_hold->tap);
+            tap_hold->held = tap_hold->tap;
+        }
+    }
+}
+
+void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+
+    if (tap_hold->held) {
+        unregister_code16(tap_hold->held);
+        tap_hold->held = 0;
+    }
+}
+
+#define ACTION_TAP_DANCE_TAP_HOLD(tap, hold)                                        \
+    {                                                                               \
+        .fn        = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, \
+        .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}),               \
+    }
+
+tap_dance_action_t tap_dance_actions[] = {
+    // Navigation tap dance actions - these appear to be for MacOS navigation
+    [Q_LFT_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_Q, LCTL(KC_LEFT)),
+    [E_RHT_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_E, LCTL(KC_RIGHT)),
+    [W_UP_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_W, LCTL(KC_UP)),
+    [S_DOWN_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_S, LCTL(KC_DOWN)),
+    // [SHFT_HYPR]     = ACTION_TAP_DANCE_FN_ADVANCED(NULL,shft_finished, shft_reset),
+    // TODO HOLD should be a different key like ~/
+    [TD_TILD] = ACTION_TAP_DANCE_DOUBLE(KC_GRAVE, KC_TILD)
+};
+// ********** TAP DANCE **********
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     tap_dance_action_t *action;
@@ -140,11 +187,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           }
           return true;
         case TD(Q_LFT_NAV): case TD(E_RHT_NAV): case TD(W_UP_NAV): case TD(S_DOWN_NAV):
-            action = &tap_dance_actions[TD_INDEX(keycode)];
+            action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
             if (!record->event.pressed && action->state.count && !action->state.finished) {
                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
                 tap_code16(tap_hold->tap);
             }
+            break;
         case KC_THUMB_MODIFIER_LAYER:
             if (record->event.pressed) {
                 layer_on(_THUMB_MODIFIER);
@@ -206,42 +254,3 @@ int cur_dance (tap_dance_state_t *state) {
   }
   else return 8; //magic number. At some point this method will expand to work for more presses
 }
-
-//instanalize an instance of 'tap' for the 'x' tap dance.
-// static tap xtap_state = {
-//   .is_press_action = true,
-//   .state = 0
-// };
-
-// void shft_finished (tap_dance_state_t *state, void *user_data) {
-//   xtap_state.state = cur_dance(state);
-//   switch (xtap_state.state) {
-//     case SINGLE_TAP: break;
-//     case SINGLE_HOLD: register_code(KC_LSFT); break;
-//     case DOUBLE_TAP: register_code(KC_LSFT); break;
-//     case DOUBLE_HOLD: break;
-//     case DOUBLE_SINGLE_TAP: register_code(KC_LSFT); unregister_code(KC_LSFT); register_code(KC_LSFT);
-//     //Last case is for fast typing. Assuming your key is `f`:
-//     //For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
-//     //In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-//   }
-// }
-
-// void shft_reset (tap_dance_state_t *state, void *user_data) {
-//     switch (xtap_state.state) {
-//         case SINGLE_TAP: break;
-//         case SINGLE_HOLD: unregister_code(KC_LSFT); break;
-//         case DOUBLE_TAP: unregister_code(KC_LSFT); break;
-//         case DOUBLE_HOLD: break;
-//         case DOUBLE_SINGLE_TAP: unregister_code(KC_LSFT);
-//         }
-//         xtap_state.state = 0;
-// }
-// ********** SHIFT **********
-
-tap_dance_action_t tap_dance_actions[] = {
-    // [SHFT_HYPR]     = ACTION_TAP_DANCE_FN_ADVANCED(NULL,shft_finished, shft_reset),
-    // TODO HOLD should be a different key like ~/
-    [TD_TILD] = ACTION_TAP_DANCE_DOUBLE(KC_GRAVE, KC_TILD)
-};
-// ********** TAP DANCE **********
