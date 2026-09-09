@@ -3,8 +3,8 @@
 
 // Base layers should be lowest layers else issues can arrise
 #define _BASE_LAYER_QWERTY 0
-#define _COLEMAK 1
-#define _WINDOWS 2
+// #define _COLEMAK 1   // not implemented (no layer defined)
+// #define _WINDOWS 2   // not implemented; re-add with OS detection if needed
 #define _FUNCTION_LAYER 3
 #define _THUMB_MODIFIER 4
 #define _TAB_HOLD_LAYER 6
@@ -13,11 +13,8 @@
 
 // Custom Keycodes
 enum custom_keycodes {
-  KC_TEN_UP = SAFE_RANGE,
-  KC_TEN_DOWN,
-  KC_THUMB_MODIFIER_LAYER,
-  KC_EMAIL_XR,
-  USB_RESTART
+  KC_THUMB_MODIFIER_LAYER = SAFE_RANGE,
+  KC_EMAIL_XR
 };
 
 // ********** COMBOS **********
@@ -32,46 +29,9 @@ combo_t key_combos[] = {
 
 
 // ********** TAP DANCE **********
-// For quad function
 enum {
-  SINGLE_TAP = 1,
-  SINGLE_HOLD = 2,
-  DOUBLE_TAP = 3,
-  DOUBLE_HOLD = 4,
-  DOUBLE_SINGLE_TAP = 5, //send two single taps
-  TRIPLE_TAP = 6,
-  TRIPLE_HOLD = 7
+    TD_TILD = 0
 };
-
-//Tap dance enums
-enum {
-    Q_LFT_NAV = 0,
-    E_RHT_NAV,
-    W_UP_NAV,
-    S_DOWN_NAV,
-    // SHFT_HYPR,
-    TD_TILD
-};
-
-// Speciifcally used for Navigation of MacOS
-typedef struct {
-    uint16_t tap;
-    uint16_t hold;
-    uint16_t held;
-} tap_dance_tap_hold_t;
-
-// For quad function
-typedef struct {
-  bool is_press_action;
-  int state;
-} tap;
-
-// function to determine the current tapdance state
-int cur_dance (tap_dance_state_t *state);
-
-// `finished` and `reset` functions for each tapdance keycode
-void shft_finished (tap_dance_state_t *state, void *user_data);
-void shft_reset (tap_dance_state_t *state, void *user_data);
 // ********** TAP DANCE **********
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -85,7 +45,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_FUNCTION_LAYER] = LAYOUT_65_ansi(
         KC_GRV, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  QK_BOOT,
         _______, RM_TOGG, RM_NEXT, RM_HUEU, RM_HUED, RM_SATU, RM_SATD, RM_VALU, RM_VALD, _______, KC_PSCR, KC_SCRL, KC_PAUS, KC_NO, QK_RBT,
-        KC_CAPS, RM_SPDU, RM_SPDD, _______, _______, _______, _______, _______, _______, _______, _______, _______,         EE_CLR,  USB_RESTART,
+        KC_CAPS, RM_SPDU, RM_SPDD, _______, _______, _______, _______, _______, _______, _______, _______, _______,         EE_CLR,  _______,
         KC_LSFT, _______, _______, _______, _______, _______, NK_TOGG, _______, _______, _______, _______, _______,          KC_VOLU, KC_MUTE,
         _______, _______, _______,                            _______,          _______, _______, _______,          KC_MPRV, KC_VOLD, KC_MNXT
     ),
@@ -106,10 +66,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [_TAB_HOLD_ONE_OSL] = LAYOUT_65_ansi(
-        HYPR(KC_P), HYPR(KC_1), HYPR(KC_2), HYPR(KC_3), HYPR(KC_4), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-        HYPR(KC_TAB), HYPR(KC_Q), HYPR(KC_W), HYPR(KC_E), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-        HYPR(KC_BACKSLASH), HYPR(KC_A), HYPR(KC_S), HYPR(KC_D), _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______,
-        HYPR(KC_LSFT), HYPR(KC_Z), HYPR(KC_X), HYPR(KC_C), _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______,
+        HYPR(KC_P), HYPR(KC_1), HYPR(KC_2), HYPR(KC_3), HYPR(KC_4), HYPR(KC_5), HYPR(KC_6), HYPR(KC_7), HYPR(KC_8), HYPR(KC_9), HYPR(KC_0), _______, _______, _______, _______,
+        HYPR(KC_TAB), HYPR(KC_Q), HYPR(KC_W), HYPR(KC_E), HYPR(KC_R), HYPR(KC_T), HYPR(KC_Y), HYPR(KC_U), HYPR(KC_I), HYPR(KC_O), _______, _______, _______, _______, _______,
+        HYPR(KC_BACKSLASH), HYPR(KC_A), HYPR(KC_S), HYPR(KC_D), HYPR(KC_F), HYPR(KC_G), HYPR(KC_H), HYPR(KC_J), HYPR(KC_K), HYPR(KC_L), _______, _______,          _______, _______,
+        HYPR(KC_LSFT), HYPR(KC_Z), HYPR(KC_X), HYPR(KC_C), HYPR(KC_V), HYPR(KC_B), HYPR(KC_N), HYPR(KC_M), _______, _______, _______, _______,          _______, _______,
         _______, _______, _______,                            HYPR(KC_SPC),          _______, _______, _______,          _______, _______, _______
     ),
     [_TAB_HOLD_TWO_OSL] = LAYOUT_65_ansi(
@@ -118,66 +78,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______,
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______,
         _______, _______, _______,                            _______,          _______, _______, _______,          _______, _______, _______
-    ),
-    [10] = LAYOUT_65_ansi(
-        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______,
-        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______,
-        _______, _______, _______,                            _______,          _______, _______, _______,          _______, _______, _______
     )
 };
 
 // ********** TAP DANCE **********
-// Tap-hold helper functions for ACTION_TAP_DANCE_TAP_HOLD
-void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
-    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
-
-    if (state->pressed) {
-        if (state->count == 1
-#ifndef PERMISSIVE_HOLD
-            && !state->interrupted
-#endif
-        ) {
-            register_code16(tap_hold->hold);
-            tap_hold->held = tap_hold->hold;
-        } else {
-            register_code16(tap_hold->tap);
-            tap_hold->held = tap_hold->tap;
-        }
-    }
-}
-
-void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
-    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
-
-    if (tap_hold->held) {
-        unregister_code16(tap_hold->held);
-        tap_hold->held = 0;
-    }
-}
-
-#define ACTION_TAP_DANCE_TAP_HOLD(tap, hold)                                        \
-    {                                                                               \
-        .fn        = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, \
-        .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}),               \
-    }
-
 tap_dance_action_t tap_dance_actions[] = {
-    // Navigation tap dance actions - these appear to be for MacOS navigation
-    [Q_LFT_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_Q, LCTL(KC_LEFT)),
-    [E_RHT_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_E, LCTL(KC_RIGHT)),
-    [W_UP_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_W, LCTL(KC_UP)),
-    [S_DOWN_NAV] = ACTION_TAP_DANCE_TAP_HOLD(KC_S, LCTL(KC_DOWN)),
-    // [SHFT_HYPR]     = ACTION_TAP_DANCE_FN_ADVANCED(NULL,shft_finished, shft_reset),
     // TODO HOLD should be a different key like ~/
     [TD_TILD] = ACTION_TAP_DANCE_DOUBLE(KC_GRAVE, KC_TILD)
 };
 // ********** TAP DANCE **********
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    tap_dance_action_t *action;
-
     switch (keycode) {
         case QK_REBOOT:
           /* Don't allow reset from oneshot layer state */
@@ -186,13 +97,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
           }
           return true;
-        case TD(Q_LFT_NAV): case TD(E_RHT_NAV): case TD(W_UP_NAV): case TD(S_DOWN_NAV):
-            action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-            if (!record->event.pressed && action->state.count && !action->state.finished) {
-                tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                tap_code16(tap_hold->tap);
-            }
-            break;
         case KC_THUMB_MODIFIER_LAYER:
             if (record->event.pressed) {
                 layer_on(_THUMB_MODIFIER);
@@ -200,25 +104,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 layer_off(_THUMB_MODIFIER);
             }
             return false;
-        case KC_TEN_UP:
-            if (record->event.pressed) {
-                // for loop KC_UP 10 times
-                for (int i = 0; i < 10; i++) {
-                    tap_code(KC_UP);
-                }
-            }
-            return false;
         case KC_EMAIL_XR:
             if (record->event.pressed) {
                 SEND_STRING("luke.martin@extremereach.com");
-            }
-            return false;
-        case KC_TEN_DOWN:
-            if (record->event.pressed) {
-                // for loop KC_DOWN 10 times
-                for (int i = 0; i < 10; i++) {
-                    tap_code(KC_DOWN);
-                }
             }
             return false;
         default:
@@ -227,30 +115,73 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-// ********** TAP DANCE **********
-// determine the tapdance state to return
-int cur_dance (tap_dance_state_t *state) {
-  if (state->count == 1) {
-    if (state->interrupted || !state->pressed)  return SINGLE_TAP;
-    //key has not been interrupted, but they key is still held. Means you want to send a 'HOLD'.
-    else return SINGLE_HOLD;
-  }
-  else if (state->count == 2) {
-    /*
-     * DOUBLE_SINGLE_TAP is to distinguish between typing "pepper", and actually wanting a double tap
-     * action when hitting 'pp'. Suggested use case for this return value is when you want to send two
-     * keystrokes of the key, and not the 'double tap' action/macro.
-    */
-    if (state->interrupted) return DOUBLE_SINGLE_TAP;
-    else if (state->pressed) return DOUBLE_HOLD;
-    else return DOUBLE_TAP;
-  }
-  //Assumes no one is trying to type the same letter three times (at least not quickly).
-  //If your tap dance key is 'KC_W', and you want to type "www." quickly - then you will need to add
-  //an exception here to return a 'TRIPLE_SINGLE_TAP', and define that enum just like 'DOUBLE_SINGLE_TAP'
-  if (state->count == 3) {
-    if (state->interrupted || !state->pressed)  return TRIPLE_TAP;
-    else return TRIPLE_HOLD;
-  }
-  else return 8; //magic number. At some point this method will expand to work for more presses
+// ********** RGB LAYER INDICATOR **********
+// Lights ONLY the keys that are actually bound on the active layer, in a
+// per-layer colour. Unbound keys go dark, so at a glance you can see both
+// which layer is live and exactly what it offers -- useful with the one-shot
+// hyper layer, which times out after ONESHOT_TIMEOUT with no other cue.
+//
+// Brightness follows the normal RGB value, so RM_VALU / RM_VALD (Fn+U / Fn+I)
+// dim it for night and raise it for daylight. RGB_MATRIX_MAXIMUM_BRIGHTNESS in
+// config.h caps how bright it can ever get.
+#ifdef RGB_MATRIX_ENABLE
+
+// Two independent knobs so the base wash and the layer colours can be tuned
+// against each other:
+//
+//   BASE_GLOW_PERCENT - the resting white wash, as a % of the current RGB
+//                       value. Lower = subtler desk glow.
+//   LAYER_VAL         - a fixed brightness for layer colours, independent of
+//                       the RGB value. Layers always render at exactly this,
+//                       so Fn+U / Fn+I now tune ONLY the resting base wash and
+//                       can never wash out or over-brighten the layer signal.
+#define BASE_GLOW_PERCENT 20
+#define LAYER_VAL         90
+
+bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    uint8_t layer = get_highest_layer(layer_state);
+
+    // Base layer: a soft neutral white wash across the whole board. This
+    // OVERRIDES whatever animation is selected, so the board stays calm and the
+    // layer colours below read as a deliberate signal rather than more noise.
+    // To get animations back (RM_NEXT), delete this block.
+    if (layer == _BASE_LAYER_QWERTY) {
+        uint8_t w = (uint16_t)rgb_matrix_get_val() * BASE_GLOW_PERCENT / 100;
+        for (uint8_t i = led_min; i < led_max; ++i) {
+            rgb_matrix_set_color(i, w, w, w);
+        }
+        return false;
+    }
+
+    uint8_t r, g, b;
+    switch (layer) {
+        case _FUNCTION_LAYER:   r = 255; g =  70; b =   0; break;  // amber
+        case _THUMB_MODIFIER:   r =   0; g = 120; b = 255; break;  // blue
+        case _TAB_HOLD_LAYER:   r =   0; g = 200; b = 200; break;  // teal
+        case _TAB_HOLD_ONE_OSL: r =   0; g = 255; b =  60; break;  // green (hyper)
+        case _TAB_HOLD_TWO_OSL: r = 255; g =   0; b = 160; break;  // magenta
+        default: return false;
+    }
+
+    // Fixed layer brightness, deliberately not tied to the RGB value.
+    r = (uint16_t)r * LAYER_VAL / 255;
+    g = (uint16_t)g * LAYER_VAL / 255;
+    b = (uint16_t)b * LAYER_VAL / 255;
+
+    for (uint8_t row = 0; row < MATRIX_ROWS; ++row) {
+        for (uint8_t col = 0; col < MATRIX_COLS; ++col) {
+            uint8_t index = g_led_config.matrix_co[row][col];
+            if (index == NO_LED || index < led_min || index >= led_max) {
+                continue;
+            }
+            uint16_t kc = keymap_key_to_keycode(layer, (keypos_t){col, row});
+            if (kc > KC_TRNS) {
+                rgb_matrix_set_color(index, r, g, b);
+            } else {
+                rgb_matrix_set_color(index, 0, 0, 0);
+            }
+        }
+    }
+    return false;
 }
+#endif
